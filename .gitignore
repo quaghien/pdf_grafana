@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+build/
+
+upload_gguf_models.py
+quantize_gguf/
+*.gguf
+.env

@@ -1,0 +1,15 @@
+# Original Text2SQL dependencies
+google-generativeai
+python-dotenv
+transformers
+accelerate
+bitsandbytes
+sentencepiece
+protobuf
+tqdm
+# conda install psycopg2
+
+# Cần tải llama-cpp-python, mỗi cấu hình chạy khác nhau cần lệnh tải khác nhau
+# pip install llama-cpp-python \
+#   --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+# https://github.com/abetlen/llama-cpp-python
