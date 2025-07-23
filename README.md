@@ -1,7 +1,4 @@
-# pdf2dashboard_grafana (Tối giản)
-
-python run_pipeline.py query2dashboard --meta_id d0088d64-6160-4476-a9e2-934d9174edb7 --question "Find net cash flow during the year 2024" --panel_title "Hqh Panel"
-
+# pdf2dashboard_grafana
 
 ## 1. Thiết lập môi trường
 - Tạo file `.env` với nội dung mẫu:
@@ -21,7 +18,7 @@ pip install -r requirements.txt
 
 - Ngoài ra còn cần tải các thư viện khác (đã nêu trong file requirements.txt)
 
-- Tải các model gguf về (nếu dùng):
+- Tải các model gguf tùy chọn về local:
 
 ```
 python download_gguf_models.py
