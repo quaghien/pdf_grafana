@@ -58,6 +58,14 @@ python run_pipeline.py query2dashboard --meta_id <meta_id> --question "Câu hỏ
 - Mỗi file panel_{id}.png là ảnh chụp panel trên dashboard vừa tạo.
 - Có thể dùng để báo cáo, nhúng vào tài liệu, hoặc kiểm thử kết quả truy vấn.
 
+## 6. Xem metadata đã tạo và tạo thử sql query
+
+```
+python run_pipeline.py list
+
+python run_pipeline.py interactive --meta_id YOUR_META_ID
+```
+
 ## 6. Lưu ý
 - Các biến môi trường phải đặt đúng trong file .env.
 - Nếu gặp lỗi kết nối, kiểm tra lại Docker và cấu hình Grafana/PostgreSQL.
