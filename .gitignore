@@ -4,5 +4,6 @@ build/
 
 upload_gguf_models.py
 quantize_gguf/
+models/
 *.gguf
 .env

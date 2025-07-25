@@ -35,36 +35,27 @@ docker compose up -d
 Kết nối postgresql với grafana trên http://localhost:3000:
 <img src="images/kết nối postgresql với grafana.png" alt="Tạo token Grafana" width="600">
 
-## 3. Flow 1: PDF → Gemini → file .md → table → up lên postgresql
-Chuyển PDF báo cáo tài chính thành dữ liệu, upload lên PostgreSQL, sinh meta_id để dùng cho bước sau.
-```bash
-python run_pipeline.py pdf2db --pdf <file.pdf> --out_dir .
-
-# python run_pipeline.py pdf2db --pdf báo_cáo_tài_chính_hợp_nhất_vinamill_28-02-2025.pdf --out_dir .
-```
-- Kết quả: sinh file .md và upload dữ liệu vào DB, in ra meta_id.
-
-## 4. Flow 2: User request → LLM (Text2SQL) → SQL query → port Grafana → tạo dashboard → tải image dashboard về local
-
-Sinh SQL từ câu hỏi, tạo dashboard/panel trên Grafana, tự động tải tất cả panel về local (panel_{id}.png).
-```bash
-python run_pipeline.py query2dashboard --meta_id <meta_id> --question "Câu hỏi tài chính" --panel_title "Tên Panel"
-
-# python run_pipeline.py query2dashboard --meta_id d0088d64-6160-4476-a9e2-934d9174edb7 --question "Find net cash flow during the year 2024" --panel_title "Hqh Panel"
-```
-- Kết quả: tạo dashboard mới, in ra UID, tải về các file panel_{id}.png (ảnh từng panel)
-
-## 5. Ý nghĩa file panel_{id}.png
-- Mỗi file panel_{id}.png là ảnh chụp panel trên dashboard vừa tạo.
-- Có thể dùng để báo cáo, nhúng vào tài liệu, hoặc kiểm thử kết quả truy vấn.
-
-## 6. Xem metadata đã tạo và tạo thử sql query
 
 ```
+# PDF to Database
+python run_pipeline.py pdf2db --pdf report.pdf
+
+# Single Question → Dashboard
+python run_pipeline.py query2dashboard --meta_id abc123 --question "Total assets 2024"
+
+# Single SQL → Panel  
+python run_pipeline.py sql2panel --meta_id abc123 --sql_query "SELECT..."
+
+# Interactive Question Mode
+python run_pipeline.py interactive_q2dash --meta_id abc123
+
+# Interactive SQL Mode  
+python run_pipeline.py interactive_sql --meta_id abc123
+
+# Utilities
 python run_pipeline.py list
-
-python run_pipeline.py interactive --meta_id YOUR_META_ID
 ```
+
 
 ## 6. Lưu ý
 - Các biến môi trường phải đặt đúng trong file .env.
@@ -72,4 +63,50 @@ python run_pipeline.py interactive --meta_id YOUR_META_ID
 - Nếu muốn đổi câu hỏi, chỉ cần chạy lại flow 2 với meta_id cũ.
 
 ---
-**Liên hệ: AI hỗ trợ tự động hóa báo cáo tài chính với Grafana** 
+Example sql query:
+
+#TABLE
+```
+python run_pipeline.py sql2panel --meta_id 68222824-35ed-4f1c-bcc0-e1329bd67421 --sql_query "SELECT
+  ending_2024_vnd
+FROM
+  balance_sheet
+WHERE
+  line_item = 'original_cost_tangible_fixed_assets';"
+```
+
+#BAR
+```
+python run_pipeline.py sql2panel --meta_id 68222824-35ed-4f1c-bcc0-e1329bd67421 --sql_query "SELECT
+  line_item,
+  year_2024_vnd,
+  year_2023_vnd
+FROM
+  cash_flow_statement
+WHERE
+  line_item IN ('net_cash_flow_from_operating_activities', 'profit_before_tax', 'depreciation_and_amortization', 'changes_in_receivables', 'changes_in_inventories', 'changes_in_payables_and_other_payables');"
+```
+#PIE
+
+```
+python run_pipeline.py sql2panel --meta_id 68222824-35ed-4f1c-bcc0-e1329bd67421 --sql_query "SELECT
+  line_item,
+  year_2024_vnd AS value_for_pie_chart -- Giá trị để vẽ biểu đồ
+FROM           
+  income_statement
+WHERE                
+  line_item IN ('revenue_from_sales_and_services', 'revenue_deductions', 'cost_of_goods_sold_and_services_rendered')
+  AND year_2024_vnd IS NOT NULL;"
+```
+
+```
+python run_pipeline.py sql2panel --meta_id 68222824-35ed-4f1c-bcc0-e1329bd67421 --sql_query "SELECT
+  line_item,
+  ending_2024_vnd AS value_for_pie_chart -- Giá trị để vẽ biểu đồ
+FROM
+  balance_sheet
+WHERE
+  line_item IN ('share_capital', 'share_premium', 'investment_and_development_fund', 'undistributed_profit_after_tax', 'other_owner_equity')
+  AND ending_2024_vnd IS NOT NULL;"
+```
+
