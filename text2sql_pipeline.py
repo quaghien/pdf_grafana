@@ -26,7 +26,7 @@ def text2sql(schema: str, evidence: str, question: str, model_path: Optional[str
     except ImportError:
         raise ImportError("Cần cài đặt llama-cpp-python: pip install llama-cpp-python")
     if model_path is None:
-        model_path = os.getenv("XIYAN_GGUF_MODEL", "/home/s24thai/Workspace/hienhq/t2sql/pdf2dashboard_grafana/xiyan-sqlcoder-7b.gguf")
+        model_path = os.getenv("XIYAN_GGUF_MODEL", "./models/xiyan-sqlcoder-7b-q4_k_m.gguf")
     if not os.path.exists(model_path):
         raise RuntimeError(f"Không tìm thấy model GGUF: {model_path}")
     model = Llama(model_path=model_path, n_ctx=16000, n_threads=1, n_gpu_layers=-1, verbose=False, seed=42)

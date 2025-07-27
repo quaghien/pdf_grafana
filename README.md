@@ -18,7 +18,7 @@ pip install -r requirements.txt
 
 - Ngoài ra còn cần tải các thư viện khác (đã nêu trong file requirements.txt)
 
-- Tải các model gguf tùy chọn về local:
+- Tải các model LLM tạo sql query về local:
 
 ```
 python download_gguf_models.py
@@ -30,83 +30,53 @@ docker compose up -d
 ```
 - PostgreSQL: cổng 5432, user/password/db: grafana/grafana/dashboard_db
 - Grafana: cổng 3000, http://localhost:3000 (user: admin, password: admin)
-- grafana-image-renderer để tại ảnh từ grafana về local
+- grafana-image-renderer để tải ảnh từ grafana về local
 
 Kết nối postgresql với grafana trên http://localhost:3000:
-<img src="images/kết nối postgresql với grafana.png" alt="Tạo token Grafana" width="600">
+<img src="images/kết nối postgresql với grafana.png" alt="Kết nối PostgreSQL với Grafana" width="600">
 
+## 3. Sử dụng
 
-```
-# PDF to Database
-python run_pipeline.py pdf2db --pdf report.pdf
-
-# Single Question → Dashboard
-python run_pipeline.py query2dashboard --meta_id abc123 --question "Total assets 2024"
-
-# Single SQL → Panel  
-python run_pipeline.py sql2panel --meta_id abc123 --sql_query "SELECT..."
-
-# Interactive Question Mode
-python run_pipeline.py interactive_q2dash --meta_id abc123
-
-# Interactive SQL Mode  
-python run_pipeline.py interactive_sql --meta_id abc123
-
-# Utilities
-python run_pipeline.py list
+### Bước 1: Convert PDF thành database
+```bash
+python run_pipeline.py pdf2db --pdf file.pdf --out_dir .
 ```
 
+### Bước 2: Tạo dashboard từ câu hỏi
+```bash
+python run_pipeline.py question2panel --meta_id YOUR_META_ID --output dashboard_panels.json
+```
+
+## 4. Ví dụ kết quả
+
+Pipeline sẽ tự động tạo và download các panel dưới dạng PNG:
+
+### Balance Sheet Analysis
+![Balance Sheet Analysis](panel/panel_1_Balance_Sheet_Analysis_20250725_175530.png)
+
+### Line Item Analysis
+![Line Item Analysis 1](panel/panel_1_Line_Item_Analysis_20250725_175605.png)
+
+![Line Item Analysis 2](panel/panel_1_Line_Item_Analysis_20250725_175942.png)
+
+## 5. Mẫu câu hỏi
+
+Đây là các câu hỏi bạn có thể sử dụng trong interactive mode:
+
+**Câu hỏi 1:**
+"Cho tôi biết nguyên giá tài sản cố định hữu hình vào cuối năm 2024 là bao nhiêu?"
+
+**Câu hỏi 2:**
+"So sánh lưu chuyển tiền thuần từ hoạt động kinh doanh, lợi nhuận trước thuế, khấu hao và phân bổ, thay đổi các khoản phải thu, thay đổi hàng tồn kho, và thay đổi các khoản phải trả và phải trả khác giữa năm 2023 và năm 2024."
+
+**Câu hỏi 3:**
+"Phân bổ các thành phần doanh thu và chi phí của năm 2024 như thế nào?"
+
+**Câu hỏi 4:**
+"Cơ cấu vốn chủ sở hữu cuối năm 2024 của công ty ra sao?"
 
 ## 6. Lưu ý
-- Các biến môi trường phải đặt đúng trong file .env.
-- Nếu gặp lỗi kết nối, kiểm tra lại Docker và cấu hình Grafana/PostgreSQL.
-- Nếu muốn đổi câu hỏi, chỉ cần chạy lại flow 2 với meta_id cũ.
-
----
-Example sql query:
-
-#TABLE
-```
-python run_pipeline.py sql2panel --meta_id 68222824-35ed-4f1c-bcc0-e1329bd67421 --sql_query "SELECT
-  ending_2024_vnd
-FROM
-  balance_sheet
-WHERE
-  line_item = 'original_cost_tangible_fixed_assets';"
-```
-
-#BAR
-```
-python run_pipeline.py sql2panel --meta_id 68222824-35ed-4f1c-bcc0-e1329bd67421 --sql_query "SELECT
-  line_item,
-  year_2024_vnd,
-  year_2023_vnd
-FROM
-  cash_flow_statement
-WHERE
-  line_item IN ('net_cash_flow_from_operating_activities', 'profit_before_tax', 'depreciation_and_amortization', 'changes_in_receivables', 'changes_in_inventories', 'changes_in_payables_and_other_payables');"
-```
-#PIE
-
-```
-python run_pipeline.py sql2panel --meta_id 68222824-35ed-4f1c-bcc0-e1329bd67421 --sql_query "SELECT
-  line_item,
-  year_2024_vnd AS value_for_pie_chart -- Giá trị để vẽ biểu đồ
-FROM           
-  income_statement
-WHERE                
-  line_item IN ('revenue_from_sales_and_services', 'revenue_deductions', 'cost_of_goods_sold_and_services_rendered')
-  AND year_2024_vnd IS NOT NULL;"
-```
-
-```
-python run_pipeline.py sql2panel --meta_id 68222824-35ed-4f1c-bcc0-e1329bd67421 --sql_query "SELECT
-  line_item,
-  ending_2024_vnd AS value_for_pie_chart -- Giá trị để vẽ biểu đồ
-FROM
-  balance_sheet
-WHERE
-  line_item IN ('share_capital', 'share_premium', 'investment_and_development_fund', 'undistributed_profit_after_tax', 'other_owner_equity')
-  AND ending_2024_vnd IS NOT NULL;"
-```
-
+- Các biến môi trường phải đặt đúng trong file .env
+- Nếu gặp lỗi kết nối, kiểm tra lại Docker và cấu hình Grafana/PostgreSQL
+- Nếu muốn thêm câu hỏi mới, chỉ cần chạy lại `question2panel` với cùng meta_id
+- Các panel được tự động download vào folder `panel/`
